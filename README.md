@@ -6,3 +6,7 @@ https://shi-works.github.io/jma-estimated-intensity-map-on-maplibre-gl-js/
 
 ## Data Source
 ### 気象庁
+- 推計震度分布
+    - 出典：https://www.jma.go.jp/bosai/map.html#&contents=estimated_intensity_map
+    - 推計震度分布のデータ（PNG形式）を気象庁のサーバより取得して表示しています。
+    - ライセンス：[利用規約](https://www.jma.go.jp/jma/kishou/info/coment.html)を参照。出典を記載すれば、自由に複製や公衆送信が可能。政府標準利用規約（第2.0版）に準拠。CC BY 4.0と互換性あり。
