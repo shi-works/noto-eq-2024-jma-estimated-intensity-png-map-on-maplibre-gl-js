@@ -188,8 +188,8 @@
             // map.setTerrain({ 'source': 'aist-dem', 'exaggeration': 1 });
 
             // JSONデータを読み込む
-            fetch('https://shi-works.github.io/jma-estimated-intensity-map-on-maplibre-gl-js/list-noto-eq.json')
-                // fetch('https://shi-works.github.io/jma-estimated-intensity-map-on-maplibre-gl-js/list-tohoku-eq.json')
+            fetch('https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-noto-eq.json')
+                // fetch('https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-tohoku-eq.json')
                 .then(response => response.json())
                 .then(data => {
                     const baseUrl = `https://www.jma.go.jp/bosai/estimated_intensity_map/data/${data[0].url}/`;
@@ -411,8 +411,8 @@
 
         // 地震データを取得して表示する関数
         function fetchAndDisplayEarthquakeData() {
-            const url = 'https://shi-works.github.io/jma-estimated-intensity-map-on-maplibre-gl-js/list-noto-eq.json';
-            // const url = 'https://shi-works.github.io/jma-estimated-intensity-map-on-maplibre-gl-js/list-tohoku-eq.json';
+            const url = 'https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-noto-eq.json';
+            // const url = 'https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-tohoku-eq.json';
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
