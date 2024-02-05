@@ -1,7 +1,7 @@
-# 気象庁の推計震度分布をMapLibre GL JSで表示するデモサイト
+# 気象庁の推計震度分布（PNG形式）をMapLibre GL JSで表示するデモサイト
 ## Public Website
 - 推計震度分布のデータ（PNG形式）を気象庁のサーバより取得して表示しています。  
-https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/
+https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-png-map-on-maplibre-gl-js/
 
 ![image](https://github.com/shi-works/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/assets/71203808/01757307-4035-4e86-8e97-de5ae1c9b341)
 
