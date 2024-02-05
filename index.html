@@ -1,449 +1,520 @@
 <html>
-
-<head>
-    <title>気象庁 推計震度分布マップ</title>
+  <head>
+    <title>令和6年能登半島地震 気象庁 推計震度分布図（PNG形式）</title>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js'></script>
-    <link href='https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css' rel='stylesheet' />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <link
+      href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css"
+      rel="stylesheet"
+    />
     <script src="https://unpkg.com/pmtiles@2.11.0/dist/index.js"></script>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
+      body {
+        margin: 0;
+        padding: 0;
+      }
 
-        #map {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 100%;
-        }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
 
-        .legend {
-            background-color: #fff;
-            border-radius: 3px;
-            bottom: 50px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
-            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-            padding: 10px;
-            position: absolute;
-            right: 10px;
-            z-index: 1;
-            line-height: 16px;
-            height: 170px;
-        }
+      .legend {
+        background-color: #fff;
+        border-radius: 3px;
+        bottom: 50px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
+        padding: 10px;
+        position: absolute;
+        right: 10px;
+        z-index: 1;
+        line-height: 16px;
+        height: 170px;
+      }
 
-        .legend h4 {
-            margin: 0 0 10px;
-        }
+      .legend h4 {
+        margin: 0 0 10px;
+      }
 
-        .legend div span {
-            border-radius: 50%;
-            display: inline-block;
-            height: 15px;
-            margin-right: 10px;
-            width: 15px;
-            color: orangered
-        }
+      .legend div span {
+        border-radius: 50%;
+        display: inline-block;
+        height: 15px;
+        margin-right: 10px;
+        width: 15px;
+        color: orangered;
+      }
 
-        .square {
-            width: 14px;
-            height: 14px;
-        }
+      .square {
+        width: 14px;
+        height: 14px;
+      }
 
-        .info {
-            background-color: #fff;
-            border-radius: 3px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
-            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-            padding: 10px;
-            position: absolute;
-            z-index: 1;
-            line-height: 16px;
-            width: 150px;
-            height: 130px;
-            top: 10px;
-            left: 10px;
-        }
+      .info {
+        background-color: #fff;
+        border-radius: 3px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
+        padding: 10px;
+        position: absolute;
+        z-index: 1;
+        line-height: 16px;
+        width: 200px;
+        height: 130px;
+        top: 10px;
+        left: 10px;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div id="map"></div>
-    <div id='legend' style="display:block;" class='legend'>
-        <h4>凡例</h4>
-        <div style="display: inline-block;">
-            <svg width="16" height="16">
-                <line x1="0" y1="0" x2="16" y2="16" stroke="yellow" stroke-width="6" stroke-linecap="square"
-                    stroke-linejoin="miter" />
-                <line x1="16" y1="0" x2="0" y2="16" stroke="yellow" stroke-width="6" stroke-linecap="square"
-                    stroke-linejoin="miter" />
-                <line x1="0" y1="0" x2="16" y2="16" stroke="red" stroke-width="3" stroke-linecap="square"
-                    stroke-linejoin="miter" />
-                <line x1="16" y1="0" x2="0" y2="16" stroke="red" stroke-width="3" stroke-linecap="square"
-                    stroke-linejoin="miter" />
-            </svg>
-        </div>
-        <span style="display: inline-block; margin-left: 5px;">震央</span><br>
-        <div class="square"
-            style='background-color: rgb(180, 0, 140); display: inline-block; border: 1px solid rgba(0, 0, 0, 0.5); '>
-        </div>
-        <span style="display: inline-block; margin-left: 5px;">震度7</span><br>
-        <div class="square"
-            style='background-color: rgb(165, 0, 33); display: inline-block; border: 1px solid rgba(0, 0, 0, 0.5);'>
-        </div>
-        <span style="display: inline-block; margin-left: 5px;">震度6強</span><br>
-        <div class="square"
-            style='background-color: rgb(255, 40, 0); display: inline-block; border: 1px solid rgba(0, 0, 0, 0.5); '>
-        </div>
-        <span style="display: inline-block; margin-left: 5px;">震度6弱</span><br>
-        <div class="square"
-            style='background-color: rgb(255, 153, 0); display: inline-block; border: 1px solid rgba(0, 0, 0, 0.5); '>
-        </div>
-        <span style="display: inline-block; margin-left: 5px;">震度5強</span><br>
-        <div class="square"
-            style='background-color: rgb(250, 230, 0); display: inline-block; border: 1px solid rgba(0, 0, 0, 0.5); '>
-        </div>
-        <span style="display: inline-block; margin-left: 5px;">震度5弱</span><br>
-        <div class="square"
-            style='background-color: rgb(250, 230, 150); display: inline-block; border: 1px solid rgba(0, 0, 0, 0.5); '>
-        </div>
-        <span style="display: inline-block; margin-left: 5px;">震度4</span><br>
+    <div id="legend" style="display: block" class="legend">
+      <h4>凡例</h4>
+      <div style="display: inline-block">
+        <img
+          src="./img/Hypo.png"
+          alt="震央"
+          style="width: 20px; height: 20px"
+        />
+      </div>
+      <span style="display: inline-block; margin-left: 5px">震央</span><br />
+      <div
+        class="square"
+        style="
+          background-color: rgb(180, 0, 140);
+          display: inline-block;
+          border: 1px solid rgba(0, 0, 0, 0.5);
+        "
+      ></div>
+      <span style="display: inline-block; margin-left: 5px">震度7</span><br />
+      <div
+        class="square"
+        style="
+          background-color: rgb(165, 0, 33);
+          display: inline-block;
+          border: 1px solid rgba(0, 0, 0, 0.5);
+        "
+      ></div>
+      <span style="display: inline-block; margin-left: 5px">震度6強</span><br />
+      <div
+        class="square"
+        style="
+          background-color: rgb(255, 40, 0);
+          display: inline-block;
+          border: 1px solid rgba(0, 0, 0, 0.5);
+        "
+      ></div>
+      <span style="display: inline-block; margin-left: 5px">震度6弱</span><br />
+      <div
+        class="square"
+        style="
+          background-color: rgb(255, 153, 0);
+          display: inline-block;
+          border: 1px solid rgba(0, 0, 0, 0.5);
+        "
+      ></div>
+      <span style="display: inline-block; margin-left: 5px">震度5強</span><br />
+      <div
+        class="square"
+        style="
+          background-color: rgb(250, 230, 0);
+          display: inline-block;
+          border: 1px solid rgba(0, 0, 0, 0.5);
+        "
+      ></div>
+      <span style="display: inline-block; margin-left: 5px">震度5弱</span><br />
+      <div
+        class="square"
+        style="
+          background-color: rgb(250, 230, 150);
+          display: inline-block;
+          border: 1px solid rgba(0, 0, 0, 0.5);
+        "
+      ></div>
+      <span style="display: inline-block; margin-left: 5px">震度4</span><br />
     </div>
-    <div id='info' style="display:block;" class='info'></div>
+    <div id="info" style="display: block" class="info"></div>
     <script type="module">
-        // Terrain-RGB形式への変換モジュール
-        maplibregl.addProtocol('numpng', makeNumPngProtocol());
-        import { makeNumPngProtocol } from './numPngProtocol.js'
+      // Terrain-RGB形式への変換モジュール
+      maplibregl.addProtocol("numpng", makeNumPngProtocol());
+      import { makeNumPngProtocol } from "./numPngProtocol.js";
 
-        // addProtocolの設定
-        let protocol = new pmtiles.Protocol();
-        maplibregl.addProtocol("pmtiles", protocol.tile);
+      // addProtocolの設定
+      let protocol = new pmtiles.Protocol();
+      maplibregl.addProtocol("pmtiles", protocol.tile);
 
-        // マップの初期化
-        const map = new maplibregl.Map({
-            container: 'map',
-            // style: 'std.json',
-            style: 'https://tile.openstreetmap.jp/styles/maptiler-basic-ja/style.json',
-            center: [137.0178, 37.0928],
-            zoom: 9.26,
-            minZoom: 1,
-            maxZoom: 23,
-            pitch: 0,
-            maxPitch: 85,
-            bearing: 0,
-            hash: true,
-            attributionControl: false
+      // マップの初期化
+      const map = new maplibregl.Map({
+        container: "map",
+        // style: 'std.json',
+        style:
+          "https://tile.openstreetmap.jp/styles/maptiler-basic-ja/style.json",
+        center: [137.0178, 37.0928],
+        zoom: 9.26,
+        minZoom: 1,
+        maxZoom: 23,
+        pitch: 0,
+        maxPitch: 85,
+        bearing: 0,
+        hash: true,
+        attributionControl: false,
+      });
+
+      // ズーム・回転
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+      // フルスクリーンモードのオンオフ
+      map.addControl(new maplibregl.FullscreenControl(), "top-right");
+
+      // 現在位置表示
+      map.addControl(
+        new maplibregl.GeolocateControl({
+          positionOptions: {
+            enableHighAccuracy: false,
+          },
+          fitBoundsOptions: { maxZoom: 18 },
+          trackUserLocation: true,
+          showUserLocation: true,
+        }),
+        "top-right"
+      );
+
+      // スケール表示
+      map.addControl(
+        new maplibregl.ScaleControl({
+          maxWidth: 200,
+          unit: "metric",
+        })
+      );
+
+      // Attributionを折りたたみ表示
+      map.addControl(
+        new maplibregl.AttributionControl({
+          compact: true,
+          customAttribution:
+            '<a href="https://www.jma.go.jp/bosai/map.html#&contents=estimated_intensity_map" target="_blank">気象庁 推計震度分布</a> | <a href="https://twitter.com/shi__works" target="_blank">Twitter</a> | <a href="https://github.com/shi-works/jma-estimated-intensity-map-on-maplibre-gl-js" target="_blank">Github</a>',
+        })
+      );
+
+      // 3D地形コントロール
+      map.addControl(
+        new maplibregl.TerrainControl({
+          source: "aist-dem",
+          exaggeration: 1, // 標高を強調する倍率
+        }),
+        "top-right"
+      );
+
+      map.on("load", function () {
+        // 産総研 シームレス標高タイルソース
+        map.addSource("aist-dem", {
+          type: "raster-dem",
+          tiles: ["numpng://tiles.gsj.jp/tiles/elev/mixed/{z}/{y}/{x}.png"],
+          attribution:
+            '<a href="https://tiles.gsj.jp/tiles/elev/tiles.html" target="_blank">産業技術総合研究所 シームレス標高タイル(統合DEM)</a>',
+          tileSize: 256,
         });
 
-        // ズーム・回転
-        map.addControl(new maplibregl.NavigationControl(), 'top-right');
+        // 産総研 シームレス標高タイルセット
+        // map.setTerrain({ 'source': 'aist-dem', 'exaggeration': 1 });
 
-        // フルスクリーンモードのオンオフ
-        map.addControl(new maplibregl.FullscreenControl(), 'top-right');
+        // JSONデータを読み込む
+        fetch(
+          "https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-noto-eq.json"
+        )
+          /*fetch(
+            "https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-tohoku-eq.json"
+          )*/
+          /*fetch(
+          "https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-kumamoto-eq.json"
+        )*/
+          .then((response) => response.json())
+          .then((data) => {
+            const baseUrl = `https://www.jma.go.jp/bosai/estimated_intensity_map/data/${data[0].url}/`;
+            const promises = data[0].mesh_num.map((meshCode) => {
+              const imageUrl = baseUrl + meshCode + ".png";
+              return addEstimatedIntensityMap(meshCode, imageUrl);
+            });
 
-        // 現在位置表示
-        map.addControl(new maplibregl.GeolocateControl({
-            positionOptions: {
-                enableHighAccuracy: false
+            // GeoJSONオブジェクトの生成
+            var geojsonData = {
+              type: "FeatureCollection",
+              features: [
+                {
+                  type: "Feature",
+                  geometry: {
+                    type: "Point",
+                    coordinates: [data[0].hypo.lon, data[0].hypo.lat],
+                  },
+                },
+              ],
+            };
+
+            Promise.all(promises).then(() => {
+              // すべての推計震度分布の画像が追加された後、震源ポイントを追加
+              addCityAreaLayer();
+              addHypoSourceAndLayer(geojsonData);
+            });
+          })
+          .catch((error) =>
+            console.error("Error loading the JSON data: ", error)
+          );
+      });
+
+      function addEstimatedIntensityMap(meshCode, imageUrl) {
+        return new Promise((resolve) => {
+          var lat = Number(meshCode.substring(0, 2)) / 1.5;
+          var lng = Number(meshCode.substring(2, 4)) + 100;
+          var lat2 = lat + 2 / 3;
+          var lng2 = lng + 1;
+
+          map.addSource("estimated_intensity_map_" + meshCode, {
+            type: "image",
+            url: imageUrl,
+            coordinates: [
+              [lng, lat2],
+              [lng2, lat2],
+              [lng2, lat],
+              [lng, lat],
+            ],
+          });
+
+          map.addLayer({
+            id: "estimated_intensity_map_layer_" + meshCode,
+            type: "raster",
+            source: "estimated_intensity_map_" + meshCode,
+            paint: {
+              "raster-opacity": 0.7,
+              "raster-resampling": "nearest",
             },
-            fitBoundsOptions: { maxZoom: 18 },
-            trackUserLocation: true,
-            showUserLocation: true
-        }), 'top-right');
+          });
+          resolve(); // 即座にPromiseを解決
+        });
+      }
 
-        // スケール表示
-        map.addControl(new maplibregl.ScaleControl({
-            maxWidth: 200,
-            unit: 'metric'
-        }));
+      function addCityAreaLayer() {
+        // 行政区域（ポリゴン）ソース
+        map.addSource("pmtiles-gyouseikai", {
+          type: "vector",
+          url:
+            "pmtiles://" +
+            "https://xs489works.xsrv.jp/pmtiles-data/ksj/N03-23_230101_gyouseikai.pmtiles",
+          attribution:
+            '<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-v3_1.html">国土数値情報 行政区域データ（令和5年度）</a>',
+        });
 
-        // Attributionを折りたたみ表示
-        map.addControl(new maplibregl.AttributionControl({
-            compact: true,
-            customAttribution: '<a href="https://www.jma.go.jp/bosai/map.html#&contents=estimated_intensity_map" target="_blank">気象庁 推計震度分布</a> | <a href="https://twitter.com/shi__works" target="_blank">Twitter</a> | <a href="https://github.com/shi-works/jma-estimated-intensity-map-on-maplibre-gl-js" target="_blank">Github</a>'
-        }));
+        // 行政区域ラインレイヤ
+        map.addLayer({
+          id: "gyouseikai-line",
+          type: "line",
+          source: "pmtiles-gyouseikai",
+          "source-layer": "N0323_230101_gyouseikai",
+          minzoom: 8,
+          maxzoom: 18,
+          paint: {
+            "line-color": "rgba(0, 0, 0, 1)",
+            "line-width": 1.5,
+          },
+        });
 
-        // 3D地形コントロール
-        map.addControl(
-            new maplibregl.TerrainControl({
-                source: 'aist-dem',
-                exaggeration: 1 // 標高を強調する倍率
-            }), 'top-right'
+        // 役場ポイントソース
+        map.addSource("town-hall", {
+          type: "geojson",
+          data: "https://xs489works.xsrv.jp/pmtiles-data/ksj/P05-22_01_47_town_hall_add_cityname.geojson",
+          attribution:
+            '<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-P05-v3_0.html">国土数値情報 市町村役場（令和4年度）</a>',
+        });
+
+        // 役場ポイントレイヤ
+        // 外側の黒い円
+        map.addLayer({
+          id: "town-hall-points-outer-1",
+          type: "circle",
+          source: "town-hall",
+          minzoom: 9,
+          maxzoom: 12,
+          paint: {
+            "circle-color": "rgba(0, 0, 0, 1)",
+            "circle-radius": 5.5,
+            "circle-blur": 0,
+            "circle-opacity": 1,
+          },
+        });
+
+        // 内側の白い円
+        map.addLayer({
+          id: "town-hall-points-inner-1",
+          type: "circle",
+          source: "town-hall",
+          minzoom: 9,
+          maxzoom: 12,
+          paint: {
+            "circle-color": "rgba(255, 255, 255, 1)",
+            "circle-radius": 4,
+            "circle-blur": 0,
+            "circle-opacity": 1,
+          },
+        });
+
+        // 外側の黒い円
+        map.addLayer({
+          id: "town-hall-points-outer-2",
+          type: "circle",
+          source: "town-hall",
+          minzoom: 9,
+          maxzoom: 12,
+          paint: {
+            "circle-color": "rgba(0, 0, 0, 1)",
+            "circle-radius": 3,
+            "circle-blur": 0,
+            "circle-opacity": 1,
+          },
+        });
+
+        // 内側の白い円
+        map.addLayer({
+          id: "town-hall-points-inner-2",
+          type: "circle",
+          source: "town-hall",
+          minzoom: 9,
+          maxzoom: 12,
+          paint: {
+            "circle-color": "rgba(255, 255, 255, 1)",
+            "circle-radius": 2.25,
+            "circle-blur": 0,
+            "circle-opacity": 1,
+          },
+        });
+
+        // 役場ラベルレイヤ
+        map.addLayer({
+          id: "town-hall-labels-1",
+          type: "symbol",
+          source: "town-hall",
+          minzoom: 9,
+          maxzoom: 12,
+          layout: {
+            "text-field": ["get", "city_name"],
+            "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+            "text-size": 12,
+            "text-anchor": "center",
+            "text-justify": "center",
+            "text-offset": [0, -1.0],
+            "text-allow-overlap": true,
+          },
+          paint: {
+            "text-color": "rgba(0, 0, 0, 1)",
+            "text-halo-color": "rgba(255, 255, 255, 1)",
+            "text-halo-width": 1,
+          },
+        });
+
+        // 役場ラベルレイヤ
+        map.addLayer({
+          id: "town-hall-labels-2",
+          type: "symbol",
+          source: "town-hall",
+          minzoom: 12,
+          maxzoom: 18,
+          layout: {
+            "text-field": ["get", "city_name"],
+            "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+            "text-size": 18,
+            "text-anchor": "center",
+            "text-justify": "center",
+            "text-offset": [0, -1.0],
+            "text-allow-overlap": true,
+          },
+          paint: {
+            "text-color": "rgba(0, 0, 0, 1)",
+            "text-halo-color": "rgba(255, 255, 255, 1)",
+            "text-halo-width": 2,
+          },
+        });
+      }
+
+      // 震源レイヤを追加する関数
+      function addHypoSourceAndLayer(geojsonData) {
+        // 震源ソース
+        map.addSource("hypo", {
+          type: "geojson",
+          data: geojsonData,
+        });
+
+        // PNGソース追加
+        map.loadImage(
+          "https://xs489works.xsrv.jp/pmtiles-data/jma-estimated-shindo/Hypo.png",
+          function (error, image) {
+            if (error) throw error;
+            map.addImage("hypo-png", image);
+          }
         );
 
-        map.on('load', function () {
-            // 産総研 シームレス標高タイルソース
-            map.addSource("aist-dem", {
-                type: 'raster-dem',
-                tiles: [
-                    'numpng://tiles.gsj.jp/tiles/elev/mixed/{z}/{y}/{x}.png',
-                ],
-                attribution: '<a href="https://tiles.gsj.jp/tiles/elev/tiles.html" target="_blank">産業技術総合研究所 シームレス標高タイル(統合DEM)</a>',
-                tileSize: 256
-            });
-
-            // 産総研 シームレス標高タイルセット
-            // map.setTerrain({ 'source': 'aist-dem', 'exaggeration': 1 });
-
-            // JSONデータを読み込む
-            fetch('https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-noto-eq.json')
-                // fetch('https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-tohoku-eq.json')
-                .then(response => response.json())
-                .then(data => {
-                    const baseUrl = `https://www.jma.go.jp/bosai/estimated_intensity_map/data/${data[0].url}/`;
-                    const promises = data[0].mesh_num.map(meshCode => {
-                        const imageUrl = baseUrl + meshCode + ".png";
-                        return addEstimatedIntensityMap(meshCode, imageUrl);
-                    });
-
-                    // GeoJSONオブジェクトの生成
-                    var geojsonData = {
-                        "type": "FeatureCollection",
-                        "features": [{
-                            "type": "Feature",
-                            "geometry": {
-                                "type": "Point",
-                                "coordinates": [data[0].hypo.lon, data[0].hypo.lat]
-                            }
-                        }]
-                    };
-
-                    Promise.all(promises).then(() => {
-                        // すべての推計震度分布の画像が追加された後、震源ポイントを追加
-                        addCityAreaLayer();
-                        addHypoSourceAndLayer(geojsonData);
-                    });
-                })
-                .catch(error => console.error('Error loading the JSON data: ', error));
-
+        // 震源シンボルレイヤ
+        map.addLayer({
+          id: "hypo-symbol",
+          type: "symbol",
+          source: "hypo",
+          layout: {
+            "icon-image": "hypo-png", // 追加したPNGイメージを使用
+            "icon-size": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              7,
+              1, // ズームレベル7でサイズは1
+              12,
+              1.4, // ズームレベル12でサイズは1.4
+            ],
+            "icon-allow-overlap": true, // アイコンが重なるのを許可
+          },
         });
+      }
 
-        function addEstimatedIntensityMap(meshCode, imageUrl) {
-            return new Promise(resolve => {
-                var lat = Number(meshCode.substring(0, 2)) / 1.5;
-                var lng = Number(meshCode.substring(2, 4)) + 100;
-                var lat2 = lat + 2 / 3;
-                var lng2 = lng + 1;
+      // 地震データを取得して表示する関数
+      function fetchAndDisplayEarthquakeData() {
+        const url =
+          "https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-noto-eq.json";
+        // const url = 'https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-tohoku-eq.json';
+        /*const url =
+          "https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-kumamoto-eq.json";*/
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            const earthquakeInfo = data[0]; // JSONデータから最初の地震情報を取得
+            const infoText = formatEarthquakeInfo(earthquakeInfo.hypo);
+            document.getElementById("info").innerHTML = infoText; // 情報をHTMLに表示
+          })
+          .catch((error) => {
+            console.error("Error fetching earthquake data:", error);
+            document.getElementById("info").innerHTML =
+              "地震情報の読み込みに失敗しました。";
+          });
+      }
 
-                map.addSource('estimated_intensity_map_' + meshCode, {
-                    type: 'image',
-                    url: imageUrl,
-                    coordinates: [[lng, lat2], [lng2, lat2], [lng2, lat], [lng, lat]],
-                });
+      // 地震情報を整形する関数
+      function formatEarthquakeInfo(hypo) {
+        const dateTime = new Date(hypo.at);
+        const formattedDate = `${dateTime.getFullYear()}年${
+          dateTime.getMonth() + 1
+        }月${dateTime.getDate()}日${dateTime.getHours()}時${dateTime.getMinutes()}分頃`;
+        const depth = hypo.dep === 0 ? "浅い" : `${hypo.dep}km`;
+        const magnitude = `M${hypo.mag}`;
+        return `
+    <span>地震の発生日時:</span><br><strong><span style="font-size: 16px;">${formattedDate}</span></strong><br>
+    <span>震央地名:</span><br><strong><span style="font-size: 16px;">${hypo.epi}</span></strong><br>
+    <span>深さ:</span><br><strong><span style="font-size: 16px;">${depth}</span></strong><br>
+    <span>マグニチュード:</span><br><strong><span style="font-size: 16px;">${magnitude}</span></strong><br>
+  `;
+      }
 
-                map.addLayer({
-                    id: 'estimated_intensity_map_layer_' + meshCode,
-                    type: 'raster',
-                    source: 'estimated_intensity_map_' + meshCode,
-                    paint: {
-                        'raster-opacity': 0.7,
-                        'raster-resampling': 'nearest',
-                    }
-                });
-                resolve(); // 即座にPromiseを解決
-            });
-        }
-
-        function addCityAreaLayer() {
-            // 行政区域（ポリゴン）ソース
-            map.addSource("pmtiles-gyouseikai", {
-                type: "vector",
-                url: "pmtiles://" + "https://xs489works.xsrv.jp/pmtiles-data/ksj/N03-23_230101_gyouseikai.pmtiles",
-                attribution: '<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-v3_1.html">国土数値情報 行政区域データ（令和5年度）</a>'
-            });
-
-            // 行政区域ラインレイヤ
-            map.addLayer({
-                "id": "gyouseikai-line",
-                "type": "line",
-                "source": "pmtiles-gyouseikai",
-                "source-layer": "N0323_230101_gyouseikai",
-                minzoom: 8,
-                maxzoom: 18,
-                'paint': {
-                    'line-color': 'rgba(0, 0, 0, 1)',
-                    'line-width': 1.5
-                }
-            });
-
-            // 役場ポイントソース
-            map.addSource('town-hall', {
-                'type': 'geojson',
-                'data': 'https://xs489works.xsrv.jp/pmtiles-data/ksj/P05-22_01_47_town_hall_add_cityname.geojson',
-                attribution: '<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-P05-v3_0.html">国土数値情報 市町村役場（令和4年度）</a>'
-            });
-
-            // 役場ポイントレイヤ
-            // 外側の黒い円
-            map.addLayer({
-                'id': 'town-hall-points-outer-1',
-                'type': 'circle',
-                'source': 'town-hall',
-                'minzoom': 9,
-                'maxzoom': 12,
-                'paint': {
-                    'circle-color': 'rgba(0, 0, 0, 1)',
-                    'circle-radius': 5.5,
-                    'circle-blur': 0,
-                    'circle-opacity': 1
-                }
-            });
-
-            // 内側の白い円
-            map.addLayer({
-                'id': 'town-hall-points-inner-1',
-                'type': 'circle',
-                'source': 'town-hall',
-                'minzoom': 9,
-                'maxzoom': 12,
-                'paint': {
-                    'circle-color': 'rgba(255, 255, 255, 1)',
-                    'circle-radius': 4,
-                    'circle-blur': 0,
-                    'circle-opacity': 1
-                }
-            });
-
-            // 外側の黒い円
-            map.addLayer({
-                'id': 'town-hall-points-outer-2',
-                'type': 'circle',
-                'source': 'town-hall',
-                'minzoom': 9,
-                'maxzoom': 12,
-                'paint': {
-                    'circle-color': 'rgba(0, 0, 0, 1)',
-                    'circle-radius': 3,
-                    'circle-blur': 0,
-                    'circle-opacity': 1
-                }
-            });
-
-            // 内側の白い円
-            map.addLayer({
-                'id': 'town-hall-points-inner-2',
-                'type': 'circle',
-                'source': 'town-hall',
-                'minzoom': 9,
-                'maxzoom': 12,
-                'paint': {
-                    'circle-color': 'rgba(255, 255, 255, 1)',
-                    'circle-radius': 2.25,
-                    'circle-blur': 0,
-                    'circle-opacity': 1
-                }
-            });
-
-            // 役場ラベルレイヤ
-            map.addLayer({
-                'id': 'town-hall-labels-1',
-                'type': 'symbol',
-                'source': 'town-hall',
-                minzoom: 9,
-                maxzoom: 12,
-                'layout': {
-                    'text-field': ['get', 'city_name'],
-                    'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-                    'text-size': 12,
-                    'text-anchor': 'center',
-                    'text-justify': 'center',
-                    'text-offset': [0, -1.0],
-                    'text-allow-overlap': true
-                },
-                'paint': {
-                    'text-color': 'rgba(0, 0, 0, 1)',
-                    'text-halo-color': 'rgba(255, 255, 255, 1)',
-                    'text-halo-width': 1
-                }
-            });
-
-            // 役場ラベルレイヤ
-            map.addLayer({
-                'id': 'town-hall-labels-2',
-                'type': 'symbol',
-                'source': 'town-hall',
-                minzoom: 12,
-                maxzoom: 18,
-                'layout': {
-                    'text-field': ['get', 'city_name'],
-                    'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-                    'text-size': 18,
-                    'text-anchor': 'center',
-                    'text-justify': 'center',
-                    'text-offset': [0, -1.0],
-                    'text-allow-overlap': true
-                },
-                'paint': {
-                    'text-color': 'rgba(0, 0, 0, 1)',
-                    'text-halo-color': 'rgba(255, 255, 255, 1)',
-                    'text-halo-width': 2
-                }
-            });
-        }
-
-        function addHypoSourceAndLayer(geojsonData) {
-            // 震源ソース
-            map.addSource('hypo', {
-                "type": "geojson",
-                "data": geojsonData
-            });
-
-            // 震源シンボルレイヤ
-            map.addLayer({
-                'id': 'hypo-symbol',
-                'type': 'symbol',
-                'source': 'hypo',
-                'layout': {
-                    'text-field': '×',
-                    'text-font': ['NotoSansJP-Regular', 'NotoSerifJP-Medium'],
-                    'text-size': 50,
-                    'text-allow-overlap': true
-                },
-                'paint': {
-                    'text-color': 'rgba(255, 0, 0, 1)',
-                    'text-halo-color': 'rgba(255, 255, 0, 1)',
-                    'text-halo-width': 2
-                }
-            });
-        }
-
-        // 地震データを取得して表示する関数
-        function fetchAndDisplayEarthquakeData() {
-            const url = 'https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-noto-eq.json';
-            // const url = 'https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/list-tohoku-eq.json';
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    const earthquakeInfo = data[0]; // JSONデータから最初の地震情報を取得
-                    const infoText = formatEarthquakeInfo(earthquakeInfo.hypo);
-                    document.getElementById('info').innerHTML = infoText; // 情報をHTMLに表示
-                })
-                .catch(error => {
-                    console.error('Error fetching earthquake data:', error);
-                    document.getElementById('info').innerHTML = '地震情報の読み込みに失敗しました。';
-                });
-        }
-
-        // 地震情報を整形する関数
-        function formatEarthquakeInfo(hypo) {
-            const dateTime = new Date(hypo.at);
-            const formattedDate = `${dateTime.getMonth() + 1}月${dateTime.getDate()}日${dateTime.getHours()}時${dateTime.getMinutes()}分頃`;
-            const depth = hypo.dep === 0 ? '浅い' : `${hypo.dep}km`;
-            const magnitude = `M${hypo.mag}`;
-            return `
-        <span>地震の発生日時:</span><br><strong><span style="font-size: 16px;">${formattedDate}</span></strong><br>
-        <span>震央地名:</span><br><strong><span style="font-size: 16px;">${hypo.epi}</span></strong><br>
-        <span>深さ:</span><br><strong><span style="font-size: 16px;">${depth}</span></strong><br>
-        <span>マグニチュード:</span><br><strong><span style="font-size: 16px;">${magnitude}</span></strong><br>
-    `;
-        }
-
-        // 関数の実行
-        fetchAndDisplayEarthquakeData();
-
+      // 関数の実行
+      fetchAndDisplayEarthquakeData();
     </script>
-</body>
-
+  </body>
 </html>
