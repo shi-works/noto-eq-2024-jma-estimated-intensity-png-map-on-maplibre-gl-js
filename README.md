@@ -3,7 +3,7 @@
 - 推計震度分布のデータ（PNG形式）を気象庁のサーバより取得して表示しています。  
 https://shi-works.github.io/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/
 
-![image](https://github.com/shi-works/jma-estimated-intensity-map-on-maplibre-gl-js/assets/71203808/a9d6a106-8dea-418c-8167-7886b73db623)
+![image](https://github.com/shi-works/noto-eq-2024-jma-estimated-intensity-map-on-maplibre-gl-js/assets/71203808/01757307-4035-4e86-8e97-de5ae1c9b341)
 
 ## Data Source
 ### 気象庁
